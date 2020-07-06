@@ -75,7 +75,9 @@ public class bala:MonoBehaviour
 
             if(hitInfo)
             {
-                objetivos(hitInfo.collider.gameObject, hitInfo.point);
+                _controlador.objetivos(hitInfo);
+
+                
 
                 _lineRenderer.enabled = true;
                 _lineRenderer.SetPosition(0,_point.transform.position);
@@ -162,32 +164,6 @@ public class bala:MonoBehaviour
     public Boolean compararAccionesNada()
     {
         return _acciones == accionesBalas.nada;
-    }
-
-    public void objetivos(GameObject obj,Vector2 punto)
-    {
-        switch(obj.tag)
-        {
-            case "Destruible":{
-
-                var tilemap = obj.GetComponent<Tilemap>();
-
-                var tilePos = tilemap.WorldToCell(punto);
-
-
-                if(tilemap.GetTile(tilePos))
-                {
-                    var name = tilemap.GetTile(tilePos).name;
-
-                    var cadena = name.Replace("tilesheet_complete_", "");
-
-                    _controlador.cambiarTile(tilemap, tilePos, cadena);
-                }
-
-
-                break;
-            }
-        }
     }
 
 }
