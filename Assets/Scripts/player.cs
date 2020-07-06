@@ -6,7 +6,7 @@ using UnityEngine;
 public class player : MonoBehaviour
 {
     public float _speed;
-    public float _hp;
+    public propiedadesVida _vida;
 
     public SpriteRenderer _sprite;
     public CircleCollider2D _col;
@@ -17,6 +17,8 @@ public class player : MonoBehaviour
     private Vector2 _center;
 
     public bala _balas;
+
+    public GameObject _points;
 
     // Start is called before the first frame update
     void Start()
@@ -31,7 +33,7 @@ public class player : MonoBehaviour
 
         _center = _col.bounds.center;
         var mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var angle = AngleBetweenPoints(_center, mousepos);
+        var angle = MathLib.AngleBetweenPoints(_center, mousepos);
 
         _balas._angle = angle;
 
@@ -39,7 +41,7 @@ public class player : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            _balas.disparo();
+            _balas.detenerDisparo();
 
             _balas._armaIndex = 0;
         }
@@ -60,31 +62,31 @@ public class player : MonoBehaviour
 
         if(Input.GetMouseButtonDown(0))
         {
-            _balas.disparo();
+            if(_balas.verificarDisparo())
+            {
+                _balas.disparo();
 
-            _sprite.sprite = _sprites[2 + _balas._armaIndex];
-
-           
+                _sprite.sprite = _sprites[2 + _balas._armaIndex];
+            }
 
         }
-        else if(Input.GetMouseButton(1))
+        else if(Input.GetMouseButtonDown(1))
         {
-            
+            if(_balas.verificarRecarga())
+            {
+                _balas.recargar();
 
-            _sprite.sprite = _sprites[5];
+                _sprite.sprite = _sprites[5];
+            }   
         }
 
         if(Input.GetMouseButtonUp(0))
         {
-            
-
-            _balas.detenerDisparo();
-
-            
+            _balas.detenerDisparo();  
         }
         else if(Input.GetMouseButtonUp(1))
         {
-           
+           _balas.detenerRecarga();
         }
 
 
@@ -113,9 +115,5 @@ public class player : MonoBehaviour
 
 
     }
-
-    float AngleBetweenPoints(Vector2 a, Vector2 b)
-    {
-        return (Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg);
-    }
+    
 }

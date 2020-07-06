@@ -6,7 +6,8 @@ using UnityEngine.Tilemaps;
 
 public class bala:MonoBehaviour
 {
-    public Timer _timer;
+    private Timer _timerDisparo;
+    private Timer _timerRecarga;
     public List<propiedadesBalas> _balas;
     public int _armaIndex;
     public enum accionesBalas { nada, disparando, recargando};
@@ -29,11 +30,11 @@ public class bala:MonoBehaviour
         var stock = _balas[_armaIndex]._stock;
 
 
-        if(_timer == null && stock>0)
+        if(_timerDisparo == null && stock>0)
         {
             generarBala();
 
-            _timer = Timer.Register(_balas[_armaIndex]._delay,
+            _timerDisparo = Timer.Register(_balas[_armaIndex]._delay,
                 delegate()
                 {
                     generarBala();
@@ -47,26 +48,11 @@ public class bala:MonoBehaviour
     {
         _acciones = accionesBalas.nada;
 
-        if(_timer != null)
+        if(_timerDisparo != null)
         {
-            _timer.Cancel();
-            _timer = null;
+            _timerDisparo.Cancel();
+            _timerDisparo = null;
         }
-    }
-
-    public void recargar()
-    {
-        _acciones = accionesBalas.recargando;
-    }
-
-    public void detenerRecarga()
-    {
-        _acciones = accionesBalas.nada;
-    }
-
-    public Boolean compararAccionesNada()
-    {
-        return _acciones == accionesBalas.nada;
     }
 
     public void generarBala()
@@ -82,8 +68,10 @@ public class bala:MonoBehaviour
             var to =  new Vector2(x,y);
             var toArreglado = new Vector2(_point.transform.position.x + x,_point.transform.position.y +y);
 
+            int layerMask = LayerMask.GetMask("Raycast");
 
-            RaycastHit2D hitInfo = Physics2D.Raycast(_point.transform.position, to, Vector2.Distance(_point.transform.position,toArreglado));
+
+            RaycastHit2D hitInfo = Physics2D.Raycast(_point.transform.position, to, Vector2.Distance(_point.transform.position,toArreglado),layerMask);
 
             if(hitInfo)
             {
@@ -109,26 +97,76 @@ public class bala:MonoBehaviour
 
         #endregion
 
-
         _balas[_armaIndex]._stock --;
 
 
         if(_balas[_armaIndex]._stock <= 0)
         {
-            if(_timer != null)
-            {
-                _timer.Cancel();
-                _timer = null;
-            }
+            detenerDisparo();
         }
-
-
     }
 
+    public bool verificarDisparo()
+    {
+        var arma = _balas[_armaIndex];
+        return arma._stock>0;
+    }
+
+    public void recargar()
+    {
+        _acciones = accionesBalas.recargando;
+
+        _timerRecarga = Timer.Register(0.5f,
+            delegate()
+            {
+                var arma = _balas[_armaIndex];
+
+                var cantidad = arma._maxStock - arma._stock;
+
+                var cantidad2 = arma._municion - cantidad;
+
+                if(cantidad2>0)
+                {
+                    _balas[_armaIndex]._stock+=cantidad;
+                    _balas[_armaIndex]._municion=cantidad2;
+                }
+                else
+                {
+                    _balas[_armaIndex]._stock= arma._stock + arma._municion;
+                    _balas[_armaIndex]._municion=0;
+                }
+
+                detenerRecarga();
+            }
+        );
+    }
+
+    public void detenerRecarga()
+    {
+        _acciones = accionesBalas.nada;
+
+        if(_timerRecarga != null)
+        {
+            _timerRecarga.Cancel();
+            _timerRecarga = null;
+        }
+    }
+
+    public bool verificarRecarga()
+    {
+        var arma = _balas[_armaIndex];
+
+        return arma._stock < arma._maxStock && _timerRecarga == null && arma._municion > 0;
+    }
+
+    public Boolean compararAccionesNada()
+    {
+        return _acciones == accionesBalas.nada;
+    }
 
     public void objetivos(GameObject obj,Vector2 punto)
     {
-        switch(obj.name)
+        switch(obj.tag)
         {
             case "Destruible":{
 
