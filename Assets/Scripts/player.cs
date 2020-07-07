@@ -35,19 +35,23 @@ public class player : MonoBehaviour
         var mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         var angle = MathLib.AngleBetweenPoints(_center, mousepos);
 
+
         _balas._angle = angle;
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)angle -180));
 
 
 
         if(Input.GetKeyDown(KeyCode.Alpha1))
         {
             _balas.detenerDisparo();
+            _balas.detenerRecarga();
 
             _balas._armaIndex = 0;
         }
         else if(Input.GetKeyDown(KeyCode.Alpha2))
         {
             _balas.detenerDisparo();
+            _balas.detenerRecarga();
 
             _balas._armaIndex = 1;
         }
@@ -110,7 +114,7 @@ public class player : MonoBehaviour
             }
         } 
 
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)angle -180));
+       
 
 
 
